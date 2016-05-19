@@ -17,6 +17,9 @@ for i = 1:2:length(varargin)
     eval([varargin{i} ' = varargin{i+1};'])
 end
 
+disp (this);
+disp (daqData(this).DaqName);
+
 %% constants
 cMPS2MPH = 2.23694;
 cMPH2FPS = 1.46667;
@@ -78,7 +81,7 @@ currentColumn = 1;
 Names = {'gender', 'age', 'time', 'intersection', 'subjectXPos', 'subjectYPos', 'subjectXAccel', 'subjectYAccel', 'steerAngle', 'numberCrashes', 'brakeForce', 'audioState', 'startEndIndication', 'crashWarning'};
 
 %Gather the gender from the filename
-gender = daqData (this).DaqName;
+gender = daqData (this).DaqName (1);
 currentColumn = currentColumn + 1;
 
 %Get the age and then write it to column 2
@@ -159,10 +162,14 @@ xlswrite (FileName, Names);
 Data2 = num2cell (Data);
 Data2 (isnan(Data)) = {'NaN'};
 Data2 (writeLength, 2) = cellstr(ageCategory);
-Data2 (writeLength, currentColumn) = cellstr('M');
+Data2 (writeLength, 1) = cellstr(gender);
 xlswrite (FileName, (Data2), 1, 'A2');
 fprintf ('%s reduced. %d%% complete.\n', daqData(this).DaqName, (this/length(daqData))*100);
 
-%%
+%% Write the filenames to an excel sheet
+namesFile = 'names.xlsx';
+xlswrite (namesFile, {FileName}, 1, strcat('A', num2str(this)));
+
+%% 
 data = [];
 results = [];
