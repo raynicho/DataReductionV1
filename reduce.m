@@ -1,9 +1,14 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% (C) Copyright 2010 by National Advanced Driving Simulator and
+% Simulation Center, the University of Iowa and The University of Iowa.
+% All rights reserved.
+%
+% Version: $ID$
+% Authors: Created by Chris Schwarz and others at the NADS
 
-% raynicho@umich.edu
-% University of Michigan Transportation Research Institute
-% Driver Interface Group 
 
+% Description: Reduce data, drive by drive
+%     
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function [results, data] = reduce( elemDataI, Fs, header, daqData, this, varargin  )
