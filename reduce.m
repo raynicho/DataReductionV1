@@ -185,6 +185,10 @@ for i = 1:4
     currentColumn = currentColumn + 1;
 end
 
+%Write the subject's velocity
+Names {1, numberOfNames} = 'subjectVelocY';
+Data (writeLength, currentColumn) = elemDataI.VDS_Chassis_CG_Vel (indicationLength, 1);
+
 %Write the names first
 xlswrite (FileName, Names);
 
