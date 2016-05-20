@@ -17,9 +17,6 @@ for i = 1:2:length(varargin)
     eval([varargin{i} ' = varargin{i+1};'])
 end
 
-disp (this);
-disp (daqData(this).DaqName);
-
 %% constants
 cMPS2MPH = 2.23694;
 cMPH2FPS = 1.46667;
@@ -89,7 +86,7 @@ ageCategory = daqData(this).DaqName (2);
 currentColumn = currentColumn + 1;
 
 %Name the file properly
-FileName = strcat(gender, ageCategory, daqData(this).DaqName(3), '_', strcat(datestr(clock,'yyyy-mm-dd_HH_MM'), '_', datestr(clock, 'ss')), '.xlsx');
+FileName = strcat(gender, ageCategory, daqData(this).DaqName(3), daqData(this).DaqName(5),'_', strcat(datestr(clock,'yyyy-mm-dd_HH_MM'), '_', datestr(clock, 'ss')), '.xlsx');
 
 %Get the time
 Data (writeLength, currentColumn) = elemDataI.Time (indicationLength);
@@ -135,11 +132,19 @@ currentColumn = currentColumn + 1;
 Data (writeLength, currentColumn) = elemDataI.SCC_LogStreams (indicationLength, 2);
 currentColumn = currentColumn + 1;
 
+extraVehicles = 0;
+
 %Get the x and y positions of the lead vehicle
 numberOfNames = length (Names) + 1;
 for i = 1:length(dyndata)
     %If the first letter is not an O (i.e. the vehicle name is not opposite)
     if ~strcmp(dyndata(i).SCC_DynObj_Name (1:1), 'O')
+        %If the vehicle is one of the four we need
+        if (strcmp (dyndata(i).SCC_DynObj_Name, 'LV') | strcmp (dyndata(i).SCC_DynObj_Name, 'ParkedV24') | strcmp (dyndata(i).SCC_DynObj_Name, 'LeftV34') | strcmp (dyndata(i).SCC_DynObj_Name, 'LeftV36'))
+           extraVehicles (length(extraVehicles)) = i; %#ok<AGROW>
+           extraVehicles (length(extraVehicles) + 1) = 0; %#ok<AGROW>
+        end
+        
         %Write the name of the vehicle alongside position identifiers
         Names {1, numberOfNames} = strcat(dyndata (i).SCC_DynObj_Name, 'posX');
         numberOfNames = numberOfNames + 1;
@@ -153,6 +158,31 @@ for i = 1:length(dyndata)
         Data (writeLength, currentColumn) = dyndata(i).SCC_DynObj_Pos (indicationLength, 1);
         currentColumn = currentColumn + 1;
     end
+end
+
+%Get the accelerator pedal position
+Names {1, numberOfNames} = 'acceleratorPedalPos';
+numberOfNames = numberOfNames + 1; %#ok<NASGU>
+Data (writeLength, currentColumn) = elemDataI.CFS_Accelerator_Pedal_Position (indicationLength);
+currentColumn = currentColumn + 1;
+
+%Get the velocities of the four vehicles needed
+for i = 1:4
+    %Write all the names for velocity and headings
+    index = extraVehicles (i);
+    vehicleName = dyndata(index).SCC_DynObj_Name;
+    Names {1, numberOfNames} = strcat(vehicleName, 'Velocity');
+    numberOfNames = numberOfNames + 1;
+    Names {1, numberOfNames} = strcat(vehicleName, 'Heading');
+    numberOfNames = numberOfNames + 1;
+    
+    %Write the velocity
+    Data (writeLength, currentColumn) = dyndata (index).SCC_DynObj_Vel (indicationLength);
+    currentColumn = currentColumn + 1;
+    
+    %Write the headings
+    Data (writeLength, currentColumn) = dyndata (index).SCC_DynObj_Heading (indicationLength);
+    currentColumn = currentColumn + 1;
 end
 
 %Write the names first
